@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+      <act_window id="action_ldap_view"
+        name="Reportes"
+        src_model="ldap.importar"
+        res_model="ldap.importar"
+        view_type="form"
+        view_mode="form"
+        target="new"
+        />
+        <!-- ldap installer  action -->
+
+        <menuitem name="LDAP" id="menu_configuracion_ldap" sequence="5"
+                  parent="user_management.menu_general_avanzado"/>
+        <record id="action_ldap" model="ir.actions.act_window">
+            <field name="name"> LDAP Servidor</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.company.ldap</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+        </record>
+        <menuitem name="LDAP Servidor" id="menu_ldap_conf_item_menu" action="action_ldap"
+                  parent="menu_configuracion_ldap"/>
+
+        <menuitem name="LDAP Importar/Exportar" id="menu_ldap_item_menu" action="action_ldap_view"
+                  parent="menu_configuracion_ldap"/>
+
+
+
+    </data>
+</odoo>

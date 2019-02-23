@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
+import ldap
+
+class LdapLdap(models.Model):
+    _name = 'ldap.ldap'
+    company = fields.Many2one('res.company', string='Company', required=True, ondelete='cascade')
+    ldap_server = fields.Char(string='LDAP Server address', required=True, default='127.0.0.1')
+    ldap_server_port = fields.Integer(string='LDAP Server port', required=True, default=389)
+    ldap_binddn = fields.Char('LDAP binddn',
+                              help="The user account on the LDAP server that is used to query the directory. "
+                                   "Leave empty to connect anonymously.")
+    ldap_password = fields.Char(string='LDAP password',
+                                help="The password of the user account on the LDAP server that is used to query the directory.")
+    ldap_filter = fields.Char(string='LDAP filter', required=True)
+    ldap_base = fields.Char(string='LDAP base', required=True)
+    ldap_tls = fields.Boolean(string='Use TLS',
+                              help="Request secure TLS/SSL encryption when connecting to the LDAP server. "
+                                   "This option requires a server with STARTTLS enabled, "
+                                   "otherwise all authentication attempts will fail.")
+
+
+@api.multi
+def importar(self):
+    l = ldap.initialize("ldap://10.30.1.48")
+    try:
+        l.protocol_version = ldap.VERSION3
+        # l.set_option(ldap.OPT_REFERRALS, 0)
+        bind = l.simple_bind_s("CN=Administrator,CN=Users,DC=uo,DC=edu,DC=cu", "*K3rn3ll1nu+*")
+        base = "OU=Usuarios,dc=uo,dc=edu,dc=cu"
+        # criteria = "(|(objectClass=user)(objectClass=person))"
+        attributes = ['cn']
+        criteria = "objectClass=person"
+        # attributes = ['uid', 'ou', 'fullName']
+        result = l.search_st(base, ldap.SCOPE_SUBTREE, criteria)
+        for entry in result:
+            # print entry[1]['departmentNumber']
+            # print
+            partner_val = {'name':entry[1]['cn'], 'nombre_usuario': entry[1]['userPrincipalName']}
+            record = self.env['gestion.usuario'].create(partner_val)
+    except ldap.LDAPError, e:
+     print('LDAPError: %s.' % e)
+    finally:
+     l.unbind()
